@@ -1,0 +1,12 @@
+[package]
+name = "wtl-rs"
+version = "0.2.0"
+authors = ["phoenicyan <https://github.com/phoenicyan>"]
+
+[lib]
+name = "wtl"
+path = "src/lib.rs"
+
+[dependencies]
+winapi = { version = "0.3", features = ["commctrl", "errhandlingapi", "minwindef", "winbase", "winuser", "winnt", "memoryapi", "shellapi", "windowsx"], path = "./pkg/winapi"}
+rand = "*"

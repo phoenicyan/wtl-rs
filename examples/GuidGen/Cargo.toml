@@ -1,0 +1,31 @@
+[package]
+name = "GuidGen"
+version = "0.1.0"
+authors = ["phoenicyan <https://github.com/phoenicyan>"]
+edition = "2018"
+build = "build.rs"
+
+[[bin]]
+name = "guidgen"
+path = "src/guidgen.rs"
+
+[dependencies]
+winapi = {version = "*",path = "../../pkg/winapi"}
+wtl-rs = {version = "*",path = "../../"}
+#trace = "*"
+uuid = { version = "*", features = ["v4"] }
+clipboard = "*"
+winreg = "*"
+
+[build-dependencies]
+bindgen = "*"
+cc = "*"
+embed-resource = "*"
+
+[profile.release]
+#opt-level = 3
+debug = false
+rpath = false
+#lto = false
+debug-assertions = false
+codegen-units = 1
