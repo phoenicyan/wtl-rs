@@ -1,0 +1,178 @@
+class CLogFont : public LOGFONT
+{
+public:
+	CLogFont()
+	{
+		memset(this, 0, sizeof(LOGFONT));
+	}
+
+	CLogFont(const LOGFONT& lf)
+	{
+		Copy(&lf);
+	}
+
+	CLogFont(HFONT hFont)
+	{
+		ATLASSERT(::GetObjectType(hFont) == OBJ_FONT);
+		::GetObject(hFont, sizeof(LOGFONT), (LOGFONT*)this);
+	}
+
+	HFONT CreateFontIndirect()
+	{
+		return ::CreateFontIndirect(this);
+	}
+
+	void SetBold()
+	{
+		lfWeight = FW_BOLD;
+	}
+
+	bool IsBold() const
+	{
+		return (lfWeight >= FW_BOLD);
+	}
+
+	void MakeBolder(int iScale = 1)
+	{
+		lfWeight += FW_BOLD * iScale;
+	}
+
+	void MakeLarger(int iScale)
+	{
+		if(lfHeight > 0)
+			lfHeight += iScale;
+		else
+			lfHeight -= iScale;
+	}
+
+	void SetHeight(LONG nPointSize, HDC hDC = NULL)
+	{
+		HDC hDC1 = (hDC != NULL) ? hDC : ::GetDC(NULL);
+		// For MM_TEXT mapping mode
+		lfHeight = -::MulDiv(nPointSize, ::GetDeviceCaps(hDC1, LOGPIXELSY), 72);
+		if(hDC == NULL)
+			::ReleaseDC(NULL, hDC1);
+	}
+
+	LONG GetHeight(HDC hDC = NULL) const
+	{
+		HDC hDC1 = (hDC != NULL) ? hDC : ::GetDC(NULL);
+		// For MM_TEXT mapping mode
+		LONG nPointSize = ::MulDiv(-lfHeight, 72, ::GetDeviceCaps(hDC1, LOGPIXELSY));
+		if(hDC == NULL)
+			::ReleaseDC(NULL, hDC1);
+
+		return nPointSize;
+	}
+
+	LONG GetDeciPointHeight(HDC hDC = NULL) const
+	{
+		HDC hDC1 = (hDC != NULL) ? hDC : ::GetDC(NULL);
+#ifndef _WIN32_WCE
+		POINT ptOrg = { 0, 0 };
+		::DPtoLP(hDC1, &ptOrg, 1);
+		POINT pt = { 0, 0 };
+		pt.y = abs(lfHeight) + ptOrg.y;
+		::LPtoDP(hDC1, &pt,1);
+		LONG nDeciPoint = ::MulDiv(pt.y, 720, ::GetDeviceCaps(hDC1, LOGPIXELSY));   // 72 points/inch, 10 decipoints/point
+#else // CE specific
+		// DP and LP are always the same on CE
+		LONG nDeciPoint = ::MulDiv(abs(lfHeight), 720, ::GetDeviceCaps(hDC1, LOGPIXELSY));   // 72 points/inch, 10 decipoints/point
+#endif // _WIN32_WCE
+		if(hDC == NULL)
+			::ReleaseDC(NULL, hDC1);
+
+		return nDeciPoint;
+	}
+
+	void SetHeightFromDeciPoint(LONG nDeciPtHeight, HDC hDC = NULL)
+	{
+		HDC hDC1 = (hDC != NULL) ? hDC : ::GetDC(NULL);
+#ifndef _WIN32_WCE
+		POINT pt = { 0, 0 };
+		pt.y = ::MulDiv(::GetDeviceCaps(hDC1, LOGPIXELSY), nDeciPtHeight, 720);   // 72 points/inch, 10 decipoints/point
+		::DPtoLP(hDC1, &pt, 1);
+		POINT ptOrg = { 0, 0 };
+		::DPtoLP(hDC1, &ptOrg, 1);
+		lfHeight = -abs(pt.y - ptOrg.y);
+#else // CE specific
+		// DP and LP are always the same on CE
+		lfHeight = -abs(::MulDiv(::GetDeviceCaps(hDC1, LOGPIXELSY), nDeciPtHeight, 720));   // 72 points/inch, 10 decipoints/point
+#endif // _WIN32_WCE
+		if(hDC == NULL)
+			::ReleaseDC(NULL, hDC1);
+	}
+
+#ifndef _WIN32_WCE
+	void SetCaptionFont()
+	{
+		NONCLIENTMETRICS ncm = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		ATLVERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0));
+		Copy(&ncm.lfCaptionFont);
+	}
+
+	void SetMenuFont()
+	{
+		NONCLIENTMETRICS ncm = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		ATLVERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0));
+		Copy(&ncm.lfMenuFont);
+	}
+
+	void SetStatusFont()
+	{
+		NONCLIENTMETRICS ncm = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		ATLVERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0));
+		Copy(&ncm.lfStatusFont);
+	}
+
+	void SetMessageBoxFont()
+	{
+		NONCLIENTMETRICS ncm = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		ATLVERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0));
+		Copy(&ncm.lfMessageFont);
+	}
+#endif // !_WIN32_WCE
+
+	void Copy(const LOGFONT* pLogFont)
+	{
+		ATLASSERT(pLogFont != NULL);
+		*(LOGFONT*)this = *pLogFont;
+	}
+
+	CLogFont& operator =(const CLogFont& src)
+	{
+		Copy(&src);
+		return *this;
+	}
+
+	CLogFont& operator =(const LOGFONT& src)
+	{
+		Copy(&src);
+		return *this;
+	}
+
+	CLogFont& operator =(HFONT hFont)
+	{
+		ATLASSERT(::GetObjectType(hFont) == OBJ_FONT);
+		::GetObject(hFont, sizeof(LOGFONT), (LOGFONT*)this);
+		return *this;
+	}
+
+	bool operator ==(const LOGFONT& logfont) const
+	{
+		return(logfont.lfHeight == lfHeight &&
+		       logfont.lfWidth == lfWidth &&
+		       logfont.lfEscapement == lfEscapement &&
+		       logfont.lfOrientation == lfOrientation &&
+		       logfont.lfWeight == lfWeight &&
+		       logfont.lfItalic == lfItalic &&
+		       logfont.lfUnderline == lfUnderline &&
+		       logfont.lfStrikeOut == lfStrikeOut &&
+		       logfont.lfCharSet == lfCharSet &&
+		       logfont.lfOutPrecision == lfOutPrecision &&
+		       logfont.lfClipPrecision == lfClipPrecision &&
+		       logfont.lfQuality == lfQuality &&
+		       logfont.lfPitchAndFamily == lfPitchAndFamily &&
+		       lstrcmp(logfont.lfFaceName, lfFaceName) == 0);
+	}
+};
