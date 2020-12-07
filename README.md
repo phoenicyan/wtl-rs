@@ -17,6 +17,12 @@ Example
 =====
 There is a simple example in examples/GuidGen directory
 
+Prerequisites:
+1) The example uses libclang.dll to convert resource.h into bindings.rs. The DLL can be 
+   installed from the link: https://clang.llvm.org.
+2) The .rc file compilation require paths to rc.exe via INCLUDE environment parameter. 
+   The INCLUDE is usually provided by vcvars.bat (from VS Native Command Prompt).
+
 Use commands below to build and run:
 ```
 cd .\examples\GuidGen
