@@ -8,5 +8,6 @@ name = "wtl"
 path = "src/lib.rs"
 
 [dependencies]
-winapi = { version = "0.3", features = ["commctrl", "errhandlingapi", "minwindef", "winbase", "winuser", "winnt", "memoryapi", "shellapi", "windowsx"], path = "./pkg/winapi"}
+# winapi = { version = "0.3", features = ["commctrl", "errhandlingapi", "minwindef", "winbase", "winuser", "winnt", "memoryapi", "shellapi", "windowsx"], path = "./pkg/winapi"}
+winapi = { version = "0.3", features = ["commctrl", "errhandlingapi", "minwindef", "winbase", "winuser", "winnt", "memoryapi", "shellapi", "windowsx"] }
 rand = "*"

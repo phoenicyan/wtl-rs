@@ -10,7 +10,7 @@ name = "guidgen"
 path = "src/guidgen.rs"
 
 [dependencies]
-winapi = {version = "*",path = "../../pkg/winapi"}
+winapi = {version = "*"}
 wtl-rs = {version = "*",path = "../../"}
 #trace = "*"
 uuid = { version = "*", features = ["v4"] }
